@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Papaparse from "papaparse";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useState } from "react";
 import axios from "axios";
 
@@ -13,10 +13,17 @@ interface iIssue {
   labels?: string | string[];
 }
 
+interface iPostResponse {
+  name: string;
+  success: boolean;
+}
+
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [startUpload, setStartUpload] = useState(false);
+  const [responses, setResponses] = useState<iPostResponse[]>([]);
 
   const uploadIssues = async (issue: iIssue) => {
     return new Promise(async (resolve, reject) => {
@@ -46,12 +53,29 @@ function App() {
         })
         .then(function (response) {
           console.log(response);
+          setResponses((prevState) => [
+            ...prevState,
+            {
+              name: issue.title,
+              success: true,
+            },
+          ]);
           resolve(response);
+          return true;
         })
         .catch(function (error) {
           console.log("upload error ", error);
-          reject(error);
+          setResponses((prevState) => [
+            ...prevState,
+            {
+              name: issue.title,
+              success: false,
+            },
+          ]);
+          resolve(false);
+          return false;
         });
+      resolve(false);
     });
   };
 
@@ -62,8 +86,13 @@ function App() {
   };
 
   const submitHandler = () => {
-    if (!selectedFile) {
+    if (!token) {
       setErrorMessage("Github Token required.");
+      return;
+    }
+
+    if (!selectedFile) {
+      setErrorMessage("CSV is required.");
       return;
     }
 
@@ -72,10 +101,16 @@ function App() {
       skipEmptyLines: true,
       complete: async function (results: any) {
         console.log("results", results.data);
+
+        setErrorMessage("");
+        setStartUpload(true);
+
         for (let index = 0; index < results.data.length; index++) {
           const result: iIssue = results.data[index];
           await uploadIssues(result);
+          console.log(index);
         }
+        setStartUpload(false);
       },
     });
   };
@@ -113,10 +148,28 @@ function App() {
               type="submit"
               className="mt-2"
               onClick={submitHandler}
+              disabled={startUpload}
             >
               Submit
             </Button>
-            <p>{errorMessage}</p>
+            {errorMessage && (
+              <Alert className="mt-3" variant={"danger"}>
+                {errorMessage}
+              </Alert>
+            )}
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <h2 className="mt-2 mb-2">Status:</h2>
+            {responses.map((r, i) => (
+              <Alert key={i} variant={r.success ? "success" : "danger"}>
+                {r.name}
+                {r.success
+                  ? " was created successfully!"
+                  : " wasn't created. An error occurred."}
+              </Alert>
+            ))}
           </Col>
         </Row>
       </Container>
