@@ -1,25 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import Papaparse from "papaparse";
+import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useState } from "react";
 
 function App() {
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+
+  const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {};
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Container className="mt-5">
+        <Row>
+          <Col>
+            <h1>React Github Issues Creator</h1>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Form.Group controlId="token" className="mb-3">
+              <Form.Label>Token</Form.Label> <br />
+              <Form.Control type="text" />
+            </Form.Group>
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Label>Upload an CSV</Form.Label>
+              <Form.Control
+                type="file"
+                name="file"
+                onChange={changeHandler}
+                accept=".csv"
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit" className="mt-2">
+              Submit
+            </Button>
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 }
 
