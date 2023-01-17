@@ -7,7 +7,21 @@ import { useState } from "react";
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
 
-  const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {};
+  const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event?.target?.files?.[0];
+    setSelectedFile(file);
+    // console.log(file);
+
+    if (file) {
+      Papaparse.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          console.log(results.data);
+        },
+      });
+    }
+  };
   return (
     <>
       <Container className="mt-5">
