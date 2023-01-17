@@ -54,11 +54,11 @@ function App() {
         .then(function (response) {
           console.log(response);
           setResponses((prevState) => [
-            ...prevState,
             {
               name: issue.title,
               success: true,
             },
+            ...prevState,
           ]);
           resolve(response);
           return true;
@@ -66,11 +66,11 @@ function App() {
         .catch(function (error) {
           console.log("upload error ", error);
           setResponses((prevState) => [
-            ...prevState,
             {
               name: issue.title,
               success: false,
             },
+            ...prevState,
           ]);
           resolve(false);
           return false;
